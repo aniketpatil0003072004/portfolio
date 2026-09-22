@@ -58,6 +58,9 @@ export default function Chatbot() {
 
     setLoading(true);
 
+    // Start measuring the complete browser-to-backend-to-AI response time.
+    const requestStartedAt = performance.now();
+
     try {
       const response = await fetch(`${API_URL}/chat`, {
         method: "POST",
@@ -90,6 +93,12 @@ export default function Chatbot() {
         );
       }
 
+      const requestFinishedAt = performance.now();
+      const latencySeconds = (
+        (requestFinishedAt - requestStartedAt) /
+        1000
+      ).toFixed(2);
+
       setMessages((current) => [
         ...current,
         {
@@ -97,6 +106,7 @@ export default function Chatbot() {
           content:
             data.answer ||
             "I could not generate an answer from the portfolio information.",
+          latency: latencySeconds,
         },
       ]);
     } catch (error) {
@@ -215,6 +225,21 @@ export default function Chatbot() {
               >
                 <div className={`chatbot-message ${message.role}`}>
                   {message.content}
+
+                  {message.role === "assistant" && message.latency && (
+                    <small
+                      style={{
+                        display: "block",
+                        marginTop: "8px",
+                        color: "#a7a59c",
+                        fontFamily: "var(--mono)",
+                        fontSize: "0.58rem",
+                        lineHeight: 1.4,
+                      }}
+                    >
+                      Response time: {message.latency} seconds
+                    </small>
+                  )}
                 </div>
               </div>
             ))}
