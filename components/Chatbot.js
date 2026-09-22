@@ -1,10 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import { FiMessageCircle, FiSend, FiX } from "react-icons/fi";
+import {
+  FiMessageCircle,
+  FiPhone,
+  FiSend,
+  FiX,
+} from "react-icons/fi";
 
 const API_URL =
   process.env.NEXT_PUBLIC_RAG_API_URL || "http://127.0.0.1:8000";
+
+const WHATSAPP_NUMBER = "916360482752";
+
+const WHATSAPP_MESSAGE =
+  "Hi Aniket, I found your portfolio and would like to connect.";
+
+const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+  WHATSAPP_MESSAGE
+)}`;
 
 const starterQuestions = [
   "Tell me about Aniket",
@@ -16,6 +30,7 @@ export default function Chatbot() {
   const [open, setOpen] = useState(false);
   const [question, setQuestion] = useState("");
   const [loading, setLoading] = useState(false);
+
   const [messages, setMessages] = useState([
     {
       role: "assistant",
@@ -32,6 +47,7 @@ export default function Chatbot() {
     }
 
     setQuestion("");
+
     setMessages((current) => [
       ...current,
       {
@@ -64,7 +80,7 @@ export default function Chatbot() {
       if (!response.ok) {
         if (response.status === 429) {
           throw new Error(
-            "The selected OpenRouter model is temporarily rate-limited. Please switch to a paid model, add your own provider key in OpenRouter, or try again later."
+            "The selected OpenRouter model is temporarily rate-limited. Please try again later or use another model."
           );
         }
 
@@ -84,11 +100,11 @@ export default function Chatbot() {
         },
       ]);
     } catch (error) {
-      const message = error?.message || "";
+      const errorMessage = error?.message || "";
 
       if (
-        message.toLowerCase().includes("failed to fetch") ||
-        message.toLowerCase().includes("networkerror")
+        errorMessage.toLowerCase().includes("failed to fetch") ||
+        errorMessage.toLowerCase().includes("networkerror")
       ) {
         setMessages((current) => [
           ...current,
@@ -103,7 +119,7 @@ export default function Chatbot() {
           ...current,
           {
             role: "assistant",
-            content: message,
+            content: errorMessage,
           },
         ]);
       }
@@ -120,13 +136,17 @@ export default function Chatbot() {
   return (
     <div className="chatbot-launcher">
       {open && (
-        <section className="chatbot-panel" aria-label="Portfolio assistant">
+        <section
+          className="chatbot-panel"
+          aria-label="Portfolio assistant"
+        >
           <header className="chatbot-header">
             <div className="chatbot-header-copy">
               <div className="chatbot-title-row">
                 <span className="chatbot-status-dot" />
                 <p>Portfolio assistant</p>
               </div>
+
               <span>Grounded in Aniket&apos;s portfolio</span>
             </div>
 
@@ -146,7 +166,9 @@ export default function Chatbot() {
                 <div className="chatbot-welcome-icon">
                   <FiMessageCircle />
                 </div>
+
                 <h2>Ask about the portfolio</h2>
+
                 <p>
                   I can explain projects, skills, education, and professional
                   experience.
@@ -163,6 +185,26 @@ export default function Chatbot() {
                     </button>
                   ))}
                 </div>
+
+                <div className="chatbot-contact-divider">
+                  <span>or contact directly</span>
+                </div>
+
+                <a
+                  className="chatbot-whatsapp"
+                  href={WHATSAPP_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <span className="chatbot-whatsapp-icon">
+                    <FiPhone />
+                  </span>
+
+                  <span className="chatbot-whatsapp-copy">
+                    <strong>Chat on WhatsApp</strong>
+                    <small>Contact Aniket directly</small>
+                  </span>
+                </a>
               </div>
             )}
 
@@ -188,7 +230,10 @@ export default function Chatbot() {
             )}
           </div>
 
-          <form className="chatbot-form" onSubmit={submitQuestion}>
+          <form
+            className="chatbot-form"
+            onSubmit={submitQuestion}
+          >
             <input
               value={question}
               onChange={(event) => setQuestion(event.target.value)}
