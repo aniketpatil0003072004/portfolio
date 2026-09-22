@@ -1,0 +1,76 @@
+{
+  "profile": {
+    "name": "Aniket Patil",
+    "label": "Computer Science & Engineering student",
+    "intro": "I build practical solutions across AI, web development, backend systems, and databases. I enjoy turning complex ideas into clear, useful products.",
+    "email": "anipatil0307@gmail.com",
+    "phone": "+91-6360482752",
+    "github": "https://github.com/aniketpatil0003072004"
+  },
+  "education": [
+    {
+      "degree": "B.E. in Computer Science & Engineering",
+      "school": "Bapuji Institute of Engineering and Technology, Davanagere",
+      "meta": "2022–2026 · CGPA: 8.60"
+    }
+  ],
+  "projects": [
+    {
+      "title": "Smart Mess Finder",
+      "badge": "Startup",
+      "desc": "A web platform for finding nearby messes, viewing menus, choosing plans, and submitting payments. Tested by 10+ messes during the testing phase.",
+      "tech": ["TypeScript", "React.js", "PostgreSQL", "Tailwind CSS", "Vite", "Supabase"],
+      "github": "https://github.com/aniketpatil0003072004/rasoi-raja-bhojan-finder"
+    },
+    {
+      "title": "Vaultify",
+      "badge": "PWA",
+      "desc": "An intelligent digital asset vault with AI-powered video metadata extraction, biometric face authentication, and client-side AES encryption.",
+      "tech": ["React", "Vite", "Supabase", "Gemini API", "Web Crypto API"],
+      "github": "https://github.com/aniketpatil0003072004/filestore"
+    },
+    {
+      "title": "Exam Slot Allocation System",
+      "badge": "In use",
+      "desc": "An AI-powered exam management platform with automated room allocation and Firebase real-time data. Tested by 20+ faculty members.",
+      "tech": ["React.js", "Firebase Firestore", "Gemini API"],
+      "github": "https://github.com/aniketpatil0003072004/Major_frontend"
+    }
+  ],
+  "skills": [
+    { "name": "C", "category": "Languages" },
+    { "name": "Python", "category": "Languages" },
+    { "name": "Java", "category": "Languages" },
+    { "name": "SQL", "category": "Languages" },
+    { "name": "HTML", "category": "Web" },
+    { "name": "CSS", "category": "Web" },
+    { "name": "JavaScript", "category": "Web" },
+    { "name": "FastAPI", "category": "Web" },
+    { "name": "MySQL", "category": "Databases" },
+    { "name": "PostgreSQL", "category": "Databases" },
+    { "name": "MongoDB", "category": "Databases" },
+    { "name": "Git", "category": "Tools" },
+    { "name": "GitHub", "category": "Tools" },
+    { "name": "Linux", "category": "Tools" },
+    { "name": "VS Code", "category": "Tools" },
+    { "name": "Google Colab", "category": "Tools" },
+    { "name": "Docker", "category": "Tools" }
+  ],
+  "experience": {
+    "role": "Software Development Intern",
+    "company": "LogicBrackets Private Limited",
+    "duration": "January 2026–July 2026",
+    "description": "Worked on backend development and contributed to scalable web applications and APIs. Delivered projects involving AI, OCR, and audio processing.",
+    "projects": [
+      {
+        "title": "OCR Document Analysis System",
+        "desc": "A tool that processes document images using OCR, organizes extracted data, and exports it to Excel for analysis and reporting."
+      },
+      {
+        "title": "Local Coding Agent",
+        "desc": "A locally running coding agent that uses local GPU resources to generate, review, and execute code autonomously."
+      }
+    ],
+    "skills": ["Python", "Git", "GitHub", "Postman", "OCR", "FastAPI", "Docker", "LLM", "Swagger Editor"]
+  }
+}
