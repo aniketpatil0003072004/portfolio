@@ -1,6 +1,8 @@
 "use client";
+
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
+import { FiMessageCircle } from "react-icons/fi";
 import { profile } from "@/data/portfolio";
 
 const roles = ["AI enthusiast", "web developer", "problem solver", "backend builder"];
@@ -33,22 +35,27 @@ export default function Hero() {
     return () => clearTimeout(timer);
   }, [tick, deleting, charIndex, currentRole]);
 
+  function openAssistant() {
+    window.dispatchEvent(new Event("open-portfolio-chat"));
+  }
+
   return (
     <section className="hero" id="home">
       <div className="container hero-content">
-        <motion.p className="eyebrow" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: .6 }}>
+        <motion.p className="eyebrow" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }}>
           Computer science & engineering · 2026
         </motion.p>
-        <motion.h1 className="hero-name" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .7 }}>
-          {/* {profile.name.split(" ")[0]} <span>{profile.name.split(" ").slice(1).join(" ")}</span> */}
-          {profile.name}
+        <motion.h1 className="hero-name" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
+          {profile.name.split(" ")[0]} <span>{profile.name.split(" ").slice(1).join(" ")}</span>
         </motion.h1>
         <div className="hero-typewriter">{currentRole.slice(0, charIndex)}<span className="typewriter-cursor" /></div>
         <p className="hero-desc">{profile.intro}</p>
         <div className="hero-buttons">
           <a href="#projects" className="btn-primary">View projects</a>
           <a href="#contact" className="btn-outline">Get in touch</a>
+          <button type="button" className="hero-ai-cta" onClick={openAssistant}><FiMessageCircle /> Ask my portfolio AI</button>
         </div>
+        <button type="button" className="hero-ai-hint" onClick={openAssistant}><span className="hero-ai-hint-dot" /> Not sure where to start? Ask the portfolio AI to guide you.</button>
       </div>
     </section>
   );

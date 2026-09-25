@@ -1,4 +1,4 @@
-"""Build or rebuild the local ChromaDB index from the structured portfolio content."""
+"""Build or rebuild the local multilingual ChromaDB index from portfolio content."""
 from __future__ import annotations
 
 import json
@@ -15,7 +15,7 @@ load_dotenv(ROOT / ".env")
 DATA_PATH = ROOT / "data" / "portfolio.json"
 CHROMA_PATH = ROOT / os.getenv("CHROMA_PERSIST_DIRECTORY", "rag/chroma_data")
 COLLECTION_NAME = os.getenv("CHROMA_COLLECTION", "portfolio-content")
-EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
+EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
 
 
 def build_documents(data: dict) -> tuple[list[str], list[dict], list[str]]:
@@ -65,7 +65,7 @@ def main():
         pass
     collection = client.get_or_create_collection(name=COLLECTION_NAME)
     collection.add(ids=ids, documents=documents, metadatas=metadatas, embeddings=embeddings)
-    print(f"Indexed {len(documents)} portfolio documents into {CHROMA_PATH}.")
+    print(f"Indexed {len(documents)} portfolio documents with {EMBEDDING_MODEL} into {CHROMA_PATH}.")
 
 
 if __name__ == "__main__":
