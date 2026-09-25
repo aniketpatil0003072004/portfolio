@@ -16,15 +16,15 @@ from sentence_transformers import SentenceTransformer
 ROOT = Path(__file__).resolve().parents[1]
 load_dotenv(ROOT / ".env")
 
-CHROMA_PATH = ROOT / os.getenv("CHROMA_PERSIST_DIRECTORY", "rag/chroma_data")
-COLLECTION_NAME = os.getenv("CHROMA_COLLECTION", "portfolio-content")
-EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
+CHROMA_PATH = ROOT / os.environ["CHROMA_PERSIST_DIRECTORY"]
+COLLECTION_NAME = os.environ["CHROMA_COLLECTION"]
+EMBEDDING_MODEL = os.environ["EMBEDDING_MODEL"]
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 WHATSAPP_NUMBER = "916360482752"
 WHATSAPP_URL = f"https://wa.me/{WHATSAPP_NUMBER}"
 
 app = FastAPI(title="Aniket Portfolio Agentic RAG API")
-origins = [item.strip() for item in os.getenv("FRONTEND_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000").split(",") if item.strip()]
+origins = [item.strip() for item in os.environ["FRONTEND_ORIGINS"].split(",") if item.strip()]
 app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=True, allow_methods=["GET", "POST"], allow_headers=["*"])
 
 _embedding_model = None
@@ -105,7 +105,7 @@ Be concise, warm, and useful. If the visitor is exploring, explain the relevant 
             {"role": "user", "content": f"Recent conversation:\n{recent_history or '(none)'}\n\nRetrieved portfolio context:\n{numbered_context}\n\nVisitor question: {question}"},
         ],
     }
-    response = requests.post(OPENROUTER_URL, headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json", "HTTP-Referer": os.getenv("SITE_URL", "http://localhost:3000"), "X-Title": "Aniket Patil Portfolio AI"}, json=payload, timeout=60)
+    response = requests.post(OPENROUTER_URL, headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json", "HTTP-Referer": os.environ["SITE_URL"], "X-Title": "Aniket Patil Portfolio AI"}, json=payload, timeout=60)
     if not response.ok:
         raise HTTPException(status_code=502, detail=f"OpenRouter request failed: {response.text[:300]}")
     body = response.json()
