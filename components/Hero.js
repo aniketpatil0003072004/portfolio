@@ -41,12 +41,12 @@ export default function Hero() {
 
   return (
     <section className="hero" id="home">
-      <div className="container hero-content">
+      <div className="container hero-content" style={{ maxWidth: "100%" }}>
         <motion.p className="eyebrow" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }}>
           Computer science & engineering · 2026
         </motion.p>
         <motion.h1 className="hero-name" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
-          {profile.name.split(" ")[0]} <span>{profile.name.split(" ").slice(1).join(" ")}</span>
+          {profile.name.split(" ")[0]} <span style={{ display: "inline-block", marginLeft: "14px" }}>{profile.name.split(" ").slice(1).join(" ")}</span>
         </motion.h1>
         <div className="hero-typewriter">{currentRole.slice(0, charIndex)}<span className="typewriter-cursor" /></div>
         <p className="hero-desc">{profile.intro}</p>

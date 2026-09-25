@@ -13,9 +13,9 @@ ROOT = Path(__file__).resolve().parents[1]
 load_dotenv(ROOT / ".env")
 
 DATA_PATH = ROOT / "data" / "portfolio.json"
-CHROMA_PATH = ROOT / os.getenv("CHROMA_PERSIST_DIRECTORY", "rag/chroma_data")
-COLLECTION_NAME = os.getenv("CHROMA_COLLECTION", "portfolio-content")
-EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
+CHROMA_PATH = ROOT / os.environ["CHROMA_PERSIST_DIRECTORY"]
+COLLECTION_NAME = os.environ["CHROMA_COLLECTION"]
+EMBEDDING_MODEL = os.environ["EMBEDDING_MODEL"]
 
 
 def build_documents(data: dict) -> tuple[list[str], list[dict], list[str]]:
