@@ -10,6 +10,8 @@ import {
   FiSend,
   FiX,
   FiZap,
+  FiMic,
+  FiVolume2,
 } from "react-icons/fi";
 
 const API_URL = process.env.NEXT_PUBLIC_RAG_API_URL || "http://127.0.0.1:8000";
@@ -45,6 +47,7 @@ export default function Chatbot() {
   const [loading, setLoading] = useState(false);
   const [showTeaser, setShowTeaser] = useState(true);
   const [showLatestButton, setShowLatestButton] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const [messages, setMessages] = useState([initialMessage]);
 
   useEffect(() => {
@@ -139,14 +142,16 @@ export default function Chatbot() {
       }
 
       const latencySeconds = ((performance.now() - requestStartedAt) / 1000).toFixed(2);
+      const answerText = data.answer || "I could not generate an answer from the portfolio information.";
       setMessages((current) => [...current, {
         role: "assistant",
-        content: data.answer || "I could not generate an answer from the portfolio information.",
+        content: answerText,
         latency: latencySeconds,
         sources: data.sources || [],
         actions: data.suggested_actions || [],
         intent: data.intent,
       }]);
+
     } catch (error) {
       const errorMessage = error?.message || "Something went wrong.";
       setMessages((current) => [...current, {
@@ -178,15 +183,41 @@ export default function Chatbot() {
     event.target.style.height = `${Math.min(event.target.scrollHeight, 120)}px`;
   }
 
+  function startListening() {
+    if (!("webkitSpeechRecognition" in window) && !("SpeechRecognition" in window)) {
+      alert("Your browser does not support voice input. Try using Chrome.");
+      return;
+    }
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.lang = getBrowserLanguage();
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => setIsListening(true);
+    recognition.onresult = (event) => {
+      const transcript = Array.from(event.results)
+        .map(result => result[0].transcript)
+        .join('');
+      setQuestion(transcript);
+    };
+    recognition.onerror = () => setIsListening(false);
+    recognition.onend = () => setIsListening(false);
+    
+    recognition.start();
+  }
+
   const conversationMessages = messages.length === 1 ? [] : messages;
 
   return (
     <div className="chatbot-launcher">
       <AnimatePresence>
         {!open && showTeaser && (
-          <motion.div className="mascot-teaser-container" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} transition={{ duration: 0.4 }}>
-            <img src="/mascot.png" alt="Aniket Patil" className="mascot-image" onClick={() => { setOpen(true); setShowTeaser(false); }} />
-          </motion.div>
+          <motion.button type="button" className="chatbot-teaser" initial={{ opacity: 0, y: 14, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 8, scale: 0.96 }} transition={{ duration: 0.35 }} onClick={() => { setOpen(true); setShowTeaser(false); }}>
+            <span className="chatbot-teaser-dot" />
+            <span><strong>Want to know about Aniket?</strong><small>Ask the AI about projects & skills</small></span>
+            <FiMessageCircle />
+          </motion.button>
         )}
       </AnimatePresence>
 
@@ -254,7 +285,10 @@ export default function Chatbot() {
 
             <form className="chatbot-form" onSubmit={submitQuestion}>
               <div className="chatbot-composer">
-                <textarea value={question} onChange={handleComposerChange} onKeyDown={handleComposerKeyDown} placeholder="Message the portfolio AI..." aria-label="Message the portfolio assistant" disabled={loading} rows={1} />
+                <textarea value={question} onChange={handleComposerChange} onKeyDown={handleComposerKeyDown} placeholder={isListening ? "Listening..." : "Message the portfolio AI..."} aria-label="Message the portfolio assistant" disabled={loading || isListening} rows={1} />
+                <button type="button" onClick={startListening} disabled={loading || isListening} aria-label="Voice Input" style={{ background: isListening ? 'var(--accent)' : 'transparent', color: isListening ? '#fff' : 'var(--muted)', width: 'auto', padding: '0 8px' }}>
+                  <FiMic />
+                </button>
                 <button type="submit" disabled={loading || !question.trim()} aria-label="Send message"><FiSend /></button>
               </div>
               <small className="chatbot-composer-hint">Enter to send · Shift + Enter for a new line</small>
