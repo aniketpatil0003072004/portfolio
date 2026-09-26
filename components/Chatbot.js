@@ -39,6 +39,7 @@ function getBrowserLanguage() {
 
 export default function Chatbot() {
   const messagesRef = useRef(null);
+  const panelRef = useRef(null);
   const [open, setOpen] = useState(false);
   const [question, setQuestion] = useState("");
   const [loading, setLoading] = useState(false);
@@ -56,6 +57,16 @@ export default function Chatbot() {
     window.addEventListener("open-portfolio-chat", openChat);
     return () => window.removeEventListener("open-portfolio-chat", openChat);
   }, []);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (open && panelRef.current && !panelRef.current.contains(event.target)) {
+        closeChat();
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
 
   useEffect(() => {
     const element = messagesRef.current;
@@ -183,7 +194,7 @@ export default function Chatbot() {
 
       <AnimatePresence mode="wait">
         {open ? (
-          <motion.section key="panel" className="chatbot-panel" aria-label="Portfolio assistant" initial={{ opacity: 0, y: 24, scale: 0.94, transformOrigin: "bottom right" }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 16, scale: 0.96 }} transition={{ type: "spring", stiffness: 280, damping: 25 }}>
+          <motion.section ref={panelRef} key="panel" className="chatbot-panel" aria-label="Portfolio assistant" initial={{ opacity: 0, y: 24, scale: 0.94, transformOrigin: "bottom right" }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 16, scale: 0.96 }} transition={{ type: "spring", stiffness: 280, damping: 25 }}>
             <header className="chatbot-header">
               <div className="chatbot-header-copy">
                 <div className="chatbot-title-row"><span className="chatbot-status-dot" /><p>Portfolio AI</p></div>
