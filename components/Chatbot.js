@@ -10,6 +10,8 @@ import {
   FiSend,
   FiX,
   FiZap,
+  FiMic,
+  FiVolume2,
 } from "react-icons/fi";
 
 const API_URL = process.env.NEXT_PUBLIC_RAG_API_URL || "http://127.0.0.1:8000";
@@ -39,11 +41,13 @@ function getBrowserLanguage() {
 
 export default function Chatbot() {
   const messagesRef = useRef(null);
+  const panelRef = useRef(null);
   const [open, setOpen] = useState(false);
   const [question, setQuestion] = useState("");
   const [loading, setLoading] = useState(false);
   const [showTeaser, setShowTeaser] = useState(true);
   const [showLatestButton, setShowLatestButton] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const [messages, setMessages] = useState([initialMessage]);
 
   useEffect(() => {
@@ -56,6 +60,16 @@ export default function Chatbot() {
     window.addEventListener("open-portfolio-chat", openChat);
     return () => window.removeEventListener("open-portfolio-chat", openChat);
   }, []);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (open && panelRef.current && !panelRef.current.contains(event.target)) {
+        closeChat();
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
 
   useEffect(() => {
     const element = messagesRef.current;
@@ -128,14 +142,16 @@ export default function Chatbot() {
       }
 
       const latencySeconds = ((performance.now() - requestStartedAt) / 1000).toFixed(2);
+      const answerText = data.answer || "I could not generate an answer from the portfolio information.";
       setMessages((current) => [...current, {
         role: "assistant",
-        content: data.answer || "I could not generate an answer from the portfolio information.",
+        content: answerText,
         latency: latencySeconds,
         sources: data.sources || [],
         actions: data.suggested_actions || [],
         intent: data.intent,
       }]);
+
     } catch (error) {
       const errorMessage = error?.message || "Something went wrong.";
       setMessages((current) => [...current, {
@@ -167,6 +183,30 @@ export default function Chatbot() {
     event.target.style.height = `${Math.min(event.target.scrollHeight, 120)}px`;
   }
 
+  function startListening() {
+    if (!("webkitSpeechRecognition" in window) && !("SpeechRecognition" in window)) {
+      alert("Your browser does not support voice input. Try using Chrome.");
+      return;
+    }
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.lang = getBrowserLanguage();
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => setIsListening(true);
+    recognition.onresult = (event) => {
+      const transcript = Array.from(event.results)
+        .map(result => result[0].transcript)
+        .join('');
+      setQuestion(transcript);
+    };
+    recognition.onerror = () => setIsListening(false);
+    recognition.onend = () => setIsListening(false);
+    
+    recognition.start();
+  }
+
   const conversationMessages = messages.length === 1 ? [] : messages;
 
   return (
@@ -175,15 +215,15 @@ export default function Chatbot() {
         {!open && showTeaser && (
           <motion.button type="button" className="chatbot-teaser" initial={{ opacity: 0, y: 14, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 8, scale: 0.96 }} transition={{ duration: 0.35 }} onClick={() => { setOpen(true); setShowTeaser(false); }}>
             <span className="chatbot-teaser-dot" />
-            <span><strong>Ask my portfolio AI</strong><small>Projects, skills, experience & contact</small></span>
-            <FiArrowUpRight />
+            <span><strong>Want to know about Aniket?</strong><small>Ask the AI about projects & skills</small></span>
+            <FiMessageCircle />
           </motion.button>
         )}
       </AnimatePresence>
 
       <AnimatePresence mode="wait">
         {open ? (
-          <motion.section key="panel" className="chatbot-panel" aria-label="Portfolio assistant" initial={{ opacity: 0, y: 24, scale: 0.94, transformOrigin: "bottom right" }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 16, scale: 0.96 }} transition={{ type: "spring", stiffness: 280, damping: 25 }}>
+          <motion.section ref={panelRef} key="panel" className="chatbot-panel" aria-label="Portfolio assistant" initial={{ opacity: 0, y: 24, scale: 0.94, transformOrigin: "bottom right" }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 16, scale: 0.96 }} transition={{ type: "spring", stiffness: 280, damping: 25 }}>
             <header className="chatbot-header">
               <div className="chatbot-header-copy">
                 <div className="chatbot-title-row"><span className="chatbot-status-dot" /><p>Portfolio AI</p></div>
@@ -245,18 +285,17 @@ export default function Chatbot() {
 
             <form className="chatbot-form" onSubmit={submitQuestion}>
               <div className="chatbot-composer">
-                <textarea value={question} onChange={handleComposerChange} onKeyDown={handleComposerKeyDown} placeholder="Message the portfolio AI..." aria-label="Message the portfolio assistant" disabled={loading} rows={1} />
+                <textarea value={question} onChange={handleComposerChange} onKeyDown={handleComposerKeyDown} placeholder={isListening ? "Listening..." : "Message the portfolio AI..."} aria-label="Message the portfolio assistant" disabled={loading || isListening} rows={1} />
+                <button type="button" onClick={startListening} disabled={loading || isListening} aria-label="Voice Input" style={{ background: isListening ? 'var(--accent)' : 'transparent', color: isListening ? '#fff' : 'var(--muted)', width: 'auto', padding: '0 8px' }}>
+                  <FiMic />
+                </button>
                 <button type="submit" disabled={loading || !question.trim()} aria-label="Send message"><FiSend /></button>
               </div>
               <small className="chatbot-composer-hint">Enter to send · Shift + Enter for a new line</small>
             </form>
             <p className="chatbot-disclaimer">Portfolio-grounded answers · no invented details</p>
           </motion.section>
-        ) : (
-          <motion.button key="button" type="button" className="chatbot-button" onClick={() => { setOpen(true); setShowTeaser(false); }} aria-label="Open portfolio assistant" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} whileHover={{ y: -4 }}>
-            <span className="chatbot-button-pulse" /><FiMessageCircle />
-          </motion.button>
-        )}
+        ) : null}
       </AnimatePresence>
     </div>
   );
