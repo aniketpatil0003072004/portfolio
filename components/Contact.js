@@ -83,7 +83,7 @@ export default function Contact() {
           {status.type !== "idle" && <p className={`contact-status ${status.type}`}>{status.type === "success" && <FiCheck />} {status.message}</p>}
         </motion.form>
       </div>
-      <footer className="footer"><div className="container"><p>© 2026 Aniket Patil · Built with Next.js · Portfolio AI included</p></div></footer>
+      <footer className="footer"><div className="container"><p>© 2026 Aniket Patil · Portfolio AI included</p></div></footer>
     </section>
   );
 }
