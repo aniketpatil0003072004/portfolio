@@ -184,11 +184,9 @@ export default function Chatbot() {
     <div className="chatbot-launcher">
       <AnimatePresence>
         {!open && showTeaser && (
-          <motion.button type="button" className="chatbot-teaser" initial={{ opacity: 0, y: 14, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 8, scale: 0.96 }} transition={{ duration: 0.35 }} onClick={() => { setOpen(true); setShowTeaser(false); }}>
-            <span className="chatbot-teaser-dot" />
-            <span><strong>Ask my portfolio AI</strong><small>Projects, skills, experience & contact</small></span>
-            <FiArrowUpRight />
-          </motion.button>
+          <motion.div className="mascot-teaser-container" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} transition={{ duration: 0.4 }}>
+            <img src="/mascot.png" alt="Aniket Patil" className="mascot-image" onClick={() => { setOpen(true); setShowTeaser(false); }} />
+          </motion.div>
         )}
       </AnimatePresence>
 
@@ -263,11 +261,7 @@ export default function Chatbot() {
             </form>
             <p className="chatbot-disclaimer">Portfolio-grounded answers · no invented details</p>
           </motion.section>
-        ) : (
-          <motion.button key="button" type="button" className="chatbot-button" onClick={() => { setOpen(true); setShowTeaser(false); }} aria-label="Open portfolio assistant" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} whileHover={{ y: -4 }}>
-            <span className="chatbot-button-pulse" /><FiMessageCircle />
-          </motion.button>
-        )}
+        ) : null}
       </AnimatePresence>
     </div>
   );
