@@ -15,7 +15,7 @@ export default function About() {
         </div>
         <div className="about-content">
           <motion.div className="about-text" initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: .5 }}>
-            <p>As a Computer Science & Engineering student, I am deeply curious about how data-driven systems can solve real-world problems. Whether I am architecting a database schema, developing a full-stack platform, or integrating machine learning models, my goal is to engineer tools that don't just work—but actually empower people.</p>
+            <p>As a Computer Science & Engineering student , I am deeply curious about how data-driven systems can solve real-world problems. Whether I am architecting a database schema, developing a full-stack platform, or integrating machine learning models, my goal is to engineer tools that don't just work—but actually empower people.</p>
             <p>I thrive on continuous learning and collaborative problem-solving. By actively experimenting with emerging technologies, I aim to translate complex technical challenges into intuitive, high-performance applications.</p>
           </motion.div>
           <div className="education-timeline">
