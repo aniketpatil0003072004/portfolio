@@ -7,7 +7,7 @@ from pathlib import Path
 
 import chromadb
 from dotenv import load_dotenv
-from sentence_transformers import SentenceTransformer
+from fastembed import TextEmbedding
 
 ROOT = Path(__file__).resolve().parents[1]
 load_dotenv(ROOT / ".env")
@@ -56,8 +56,8 @@ def main():
     data = json.loads(DATA_PATH.read_text(encoding="utf-8"))
     documents, metadatas, ids = build_documents(data)
     CHROMA_PATH.mkdir(parents=True, exist_ok=True)
-    model = SentenceTransformer(EMBEDDING_MODEL)
-    embeddings = model.encode(documents, normalize_embeddings=True).tolist()
+    model = TextEmbedding(model_name=EMBEDDING_MODEL)
+    embeddings = [list(model.embed([doc]))[0].tolist() for doc in documents]
     client = chromadb.PersistentClient(path=str(CHROMA_PATH))
     try:
         client.delete_collection(COLLECTION_NAME)
