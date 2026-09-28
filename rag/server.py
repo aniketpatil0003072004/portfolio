@@ -151,28 +151,12 @@ async def chat(payload: Question):
             langchain_history.append(AIMessage(content=msg.content))
             
     try:
-        # 1. Define the Node.js GitHub MCP command
-        npx_cmd = "npx.cmd" if os.name == "nt" else "npx"
-        server_params = StdioServerParameters(
-            command=npx_cmd,
-            args=["-y", "@modelcontextprotocol/server-github"],
-            env={"GITHUB_PERSONAL_ACCESS_TOKEN": os.environ.get("GITHUB_PERSONAL_ACCESS_TOKEN", ""), "PATH": os.environ.get("PATH", "")}
-        )
-        
-        # 2. Start the MCP process and connect
-        async with stdio_client(server_params) as (read, write):
-            async with ClientSession(read, write) as session:
-                await session.initialize()
-                
-                # 3. Ask MCP for its tools and convert to LangChain tools
-                mcp_tools = await load_mcp_tools(session)
-                
-                # 4. Inject MCP tools into our Agent
-                executor = get_agent_executor(mcp_tools)
-                response = await executor.ainvoke({
-                    "messages": langchain_history + [HumanMessage(content=question)]
-                })
-                answer = response["messages"][-1].content
+        # Instantiate agent with just the portfolio tool for instant responses
+        executor = get_agent_executor([])
+        response = await executor.ainvoke({
+            "messages": langchain_history + [HumanMessage(content=question)]
+        })
+        answer = response["messages"][-1].content
     except Exception as e:
         print("AGENT ERROR:", str(e))
         raise HTTPException(status_code=502, detail=f"Agent error: {str(e)}")
