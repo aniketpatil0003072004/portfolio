@@ -184,7 +184,7 @@ export default function Chatbot() {
         {
           role: "assistant",
           content: errorMessage.toLowerCase().includes("failed to fetch")
-            ? "I cannot reach the portfolio AI backend. Start FastAPI at http://127.0.0.1:8000 and try again."
+            ? "I cannot reach the portfolio AI backend right now. The server might be asleep or unreachable. Please try again."
             : errorMessage,
         },
       ]);
