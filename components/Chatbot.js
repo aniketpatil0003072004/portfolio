@@ -21,13 +21,13 @@ const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent
 
 const starterQuestions = [
   "Give me a quick tour of his work",
-  "Which project is best for an AI role?",
+  "What is the latest commit on his filestore repo?",
   "What technologies does he use?",
 ];
 
 const initialMessage = {
   role: "assistant",
-  content: "Hi! I am Aniket's portfolio AI. Ask me about his projects, skills, education, or experience — I can also guide you to contact him.",
+  content: "Hi! I am Aniket's portfolio AI. Ask me about his projects, skills, education, or experience — I can also search his live GitHub repositories!",
   actions: [
     { label: "View contact options", type: "scroll", target: "contact" },
     { label: "Chat on WhatsApp", type: "whatsapp", href: WHATSAPP_URL },
@@ -215,7 +215,7 @@ export default function Chatbot() {
         {!open && showTeaser && (
           <motion.button type="button" className="chatbot-teaser" initial={{ opacity: 0, y: 14, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 8, scale: 0.96 }} transition={{ duration: 0.35 }} onClick={() => { setOpen(true); setShowTeaser(false); }}>
             <span className="chatbot-teaser-dot" />
-            <span><strong>Want to know about Aniket?</strong><small>Ask the AI about projects & skills</small></span>
+            <span><strong>Want to know about Aniket?</strong><small>Ask the AI about projects, skills & live GitHub</small></span>
             <FiMessageCircle />
           </motion.button>
         )}
@@ -246,7 +246,7 @@ export default function Chatbot() {
                   <div className="chatbot-welcome-icon"><FiMessageCircle /></div>
                   <p className="chatbot-welcome-eyebrow">A guided tour of the portfolio</p>
                   <h2>What would you like to explore?</h2>
-                  <p>Ask in your own words. I can explain the work, find relevant technologies, and guide you to the right next step.</p>
+                  <p>Ask in your own words. I can explain the work, find relevant technologies, and even search Aniket's live GitHub repositories.</p>
                   <div className="chatbot-welcome-actions">
                     {initialMessage.actions.map((action) => action.type === "whatsapp" ? <a key={action.label} href={action.href} target="_blank" rel="noopener noreferrer">{action.label}<FiPhone /></a> : <button key={action.label} type="button" onClick={() => runAction(action)}>{action.label}<FiArrowUpRight /></button>)}
                   </div>
