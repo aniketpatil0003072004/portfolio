@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-from sentence_transformers import SentenceTransformer
+from fastembed import TextEmbedding
 
 from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI
@@ -56,7 +56,7 @@ def get_collection():
         if not CHROMA_PATH.exists():
             raise HTTPException(status_code=503, detail="The portfolio index is not built yet. Run python rag/ingest.py first.")
         try:
-            _embedding_model = SentenceTransformer(EMBEDDING_MODEL)
+            _embedding_model = TextEmbedding(model_name=EMBEDDING_MODEL)
             client = chromadb.PersistentClient(path=str(CHROMA_PATH))
             _collection = client.get_collection(name=COLLECTION_NAME)
         except Exception as error:
@@ -98,8 +98,8 @@ def search_portfolio(query: str) -> str:
     collection = get_collection()
     global _embedding_model
     if _embedding_model is None:
-        _embedding_model = SentenceTransformer(EMBEDDING_MODEL)
-    query_embedding = _embedding_model.encode([query], normalize_embeddings=True).tolist()
+        _embedding_model = TextEmbedding(model_name=EMBEDDING_MODEL)
+    query_embedding = [list(_embedding_model.embed([query]))[0].tolist()]
     result = collection.query(query_embeddings=query_embedding, n_results=6, include=["documents"])
     documents = result.get("documents", [[]])[0]
     if not documents:
