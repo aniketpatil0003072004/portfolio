@@ -11,23 +11,23 @@ import {
   FiX,
   FiZap,
   FiMic,
-  FiVolume2,
 } from "react-icons/fi";
 
 const API_URL = process.env.NEXT_PUBLIC_RAG_API_URL || "http://127.0.0.1:8000";
-const WHATSAPP_NUMBER = "916360482752";
+const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "";
 const WHATSAPP_MESSAGE = "Hi Aniket, I found your portfolio and would like to connect.";
 const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`;
 
 const starterQuestions = [
   "Give me a quick tour of his work",
-  "Which project is best for an AI role?",
+  "What is the latest commit on his filestore repo?",
   "What technologies does he use?",
 ];
 
 const initialMessage = {
   role: "assistant",
-  content: "Hi! I am Aniket's portfolio AI. Ask me about his projects, skills, education, or experience — I can also guide you to contact him.",
+  content:
+    "Hi! I am Aniket's portfolio AI. Ask me about his projects, skills, education, or experience — I can also search his live GitHub repositories!",
   actions: [
     { label: "View contact options", type: "scroll", target: "contact" },
     { label: "Chat on WhatsApp", type: "whatsapp", href: WHATSAPP_URL },
@@ -67,6 +67,7 @@ export default function Chatbot() {
         closeChat();
       }
     }
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
@@ -97,15 +98,19 @@ export default function Chatbot() {
 
   function handleMessagesScroll(event) {
     const element = event.currentTarget;
-    const distanceFromBottom = element.scrollHeight - element.scrollTop - element.clientHeight;
+    const distanceFromBottom =
+      element.scrollHeight - element.scrollTop - element.clientHeight;
     setShowLatestButton(distanceFromBottom > 120);
   }
 
   function runAction(action) {
     if (action.type === "whatsapp") return;
+
     if (action.type === "scroll" && action.target) {
       closeChat();
-      document.getElementById(action.target)?.scrollIntoView({ behavior: "smooth" });
+      document
+        .getElementById(action.target)
+        ?.scrollIntoView({ behavior: "smooth" });
     }
   }
 
@@ -114,7 +119,10 @@ export default function Chatbot() {
     if (!trimmedQuestion || loading) return;
 
     setQuestion("");
-    setMessages((current) => [...current, { role: "user", content: trimmedQuestion }]);
+    setMessages((current) => [
+      ...current,
+      { role: "user", content: trimmedQuestion },
+    ]);
     setLoading(true);
     const requestStartedAt = performance.now();
 
@@ -125,7 +133,9 @@ export default function Chatbot() {
         body: JSON.stringify({
           question: trimmedQuestion,
           language: getBrowserLanguage(),
-          history: messages.slice(-6).map(({ role, content }) => ({ role, content })),
+          history: messages
+            .slice(-6)
+            .map(({ role, content }) => ({ role, content })),
         }),
       });
 
@@ -137,29 +147,47 @@ export default function Chatbot() {
       }
 
       if (!response.ok) {
-        if (response.status === 429) throw new Error("The AI model is temporarily rate-limited. Please try again shortly.");
-        throw new Error(data.detail || `The chatbot backend returned an error (${response.status}).`);
+        if (response.status === 429) {
+          throw new Error(
+            "The AI model is temporarily rate-limited. Please try again shortly."
+          );
+        }
+        throw new Error(
+          data.detail ||
+            `The chatbot backend returned an error (${response.status}).`
+        );
       }
 
-      const latencySeconds = ((performance.now() - requestStartedAt) / 1000).toFixed(2);
-      const answerText = data.answer || "I could not generate an answer from the portfolio information.";
-      setMessages((current) => [...current, {
-        role: "assistant",
-        content: answerText,
-        latency: latencySeconds,
-        sources: data.sources || [],
-        actions: data.suggested_actions || [],
-        intent: data.intent,
-      }]);
+      const latencySeconds = (
+        (performance.now() - requestStartedAt) /
+        1000
+      ).toFixed(2);
+      const answerText =
+        data.answer ||
+        "I could not generate an answer from the portfolio information.";
 
+      setMessages((current) => [
+        ...current,
+        {
+          role: "assistant",
+          content: answerText,
+          latency: latencySeconds,
+          sources: data.sources || [],
+          actions: data.suggested_actions || [],
+          intent: data.intent,
+        },
+      ]);
     } catch (error) {
       const errorMessage = error?.message || "Something went wrong.";
-      setMessages((current) => [...current, {
-        role: "assistant",
-        content: errorMessage.toLowerCase().includes("failed to fetch")
-          ? "I cannot reach the portfolio AI backend. Start FastAPI at http://127.0.0.1:8000 and try again."
-          : errorMessage,
-      }]);
+      setMessages((current) => [
+        ...current,
+        {
+          role: "assistant",
+          content: errorMessage.toLowerCase().includes("failed to fetch")
+            ? "I cannot reach the portfolio AI backend. Start FastAPI at http://127.0.0.1:8000 and try again."
+            : errorMessage,
+        },
+      ]);
     } finally {
       setLoading(false);
     }
@@ -184,11 +212,17 @@ export default function Chatbot() {
   }
 
   function startListening() {
-    if (!("webkitSpeechRecognition" in window) && !("SpeechRecognition" in window)) {
+    if (
+      typeof window === "undefined" ||
+      (!("webkitSpeechRecognition" in window) &&
+        !("SpeechRecognition" in window))
+    ) {
       alert("Your browser does not support voice input. Try using Chrome.");
       return;
     }
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
     recognition.lang = getBrowserLanguage();
     recognition.interimResults = false;
@@ -197,13 +231,13 @@ export default function Chatbot() {
     recognition.onstart = () => setIsListening(true);
     recognition.onresult = (event) => {
       const transcript = Array.from(event.results)
-        .map(result => result[0].transcript)
-        .join('');
+        .map((result) => result[0].transcript)
+        .join("");
       setQuestion(transcript);
     };
     recognition.onerror = () => setIsListening(false);
     recognition.onend = () => setIsListening(false);
-    
+
     recognition.start();
   }
 
@@ -213,87 +247,276 @@ export default function Chatbot() {
     <div className="chatbot-launcher">
       <AnimatePresence>
         {!open && showTeaser && (
-          <motion.button type="button" className="chatbot-teaser" initial={{ opacity: 0, y: 14, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 8, scale: 0.96 }} transition={{ duration: 0.35 }} onClick={() => { setOpen(true); setShowTeaser(false); }}>
-            <span className="chatbot-teaser-dot" />
-            <span><strong>Want to know about Aniket?</strong><small>Ask the AI about projects & skills</small></span>
-            <FiMessageCircle />
+          <motion.button
+            type="button"
+            className="chatbot-teaser"
+            aria-label="Open Aniket's portfolio AI assistant"
+            initial={{ opacity: 0, y: 18, scale: 0.94 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 12, scale: 0.94 }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            onClick={() => {
+              setOpen(true);
+              setShowTeaser(false);
+            }}
+          >
+            <span className="chatbot-person-scene" aria-hidden="true">
+              <span className="chatbot-person-glow" />
+              <span className="chatbot-person-head">
+                <span className="chatbot-person-hair" />
+                <span className="chatbot-person-face" />
+              </span>
+              <span className="chatbot-person-neck" />
+              <span className="chatbot-person-body" />
+              <span className="chatbot-person-arm chatbot-person-arm-left" />
+              <span className="chatbot-person-arm chatbot-person-arm-right" />
+              <span className="chatbot-person-phone">
+                <FiPhone />
+              </span>
+            </span>
+
+            <span className="chatbot-thought-bubble">
+              <span className="chatbot-thought-dots" aria-hidden="true">
+                <i />
+                <i />
+                <i />
+              </span>
+              <strong>Thinking about Aniket?</strong>
+              <small>Click here — I can tell you about his work.</small>
+            </span>
+
+            <span className="chatbot-teaser-arrow" aria-hidden="true">
+              <FiArrowUpRight />
+            </span>
           </motion.button>
         )}
       </AnimatePresence>
 
       <AnimatePresence mode="wait">
         {open ? (
-          <motion.section ref={panelRef} key="panel" className="chatbot-panel" aria-label="Portfolio assistant" initial={{ opacity: 0, y: 24, scale: 0.94, transformOrigin: "bottom right" }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 16, scale: 0.96 }} transition={{ type: "spring", stiffness: 280, damping: 25 }}>
+          <motion.section
+            ref={panelRef}
+            key="panel"
+            className="chatbot-panel"
+            aria-label="Portfolio assistant"
+            initial={{ opacity: 0, y: 24, scale: 0.94, transformOrigin: "bottom right" }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 16, scale: 0.96 }}
+            transition={{ type: "spring", stiffness: 280, damping: 25 }}
+          >
             <header className="chatbot-header">
               <div className="chatbot-header-copy">
-                <div className="chatbot-title-row"><span className="chatbot-status-dot" /><p>Portfolio AI</p></div>
-                <span><FiZap /> multilingual · grounded</span>
+                <div className="chatbot-title-row">
+                  <span className="chatbot-status-dot" />
+                  <p>Portfolio AI</p>
+                </div>
+                <span>
+                  <FiZap /> multilingual · grounded
+                </span>
               </div>
+
               <div className="chatbot-header-actions">
-                <a className="chatbot-whatsapp-header-btn" href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-                  <FiPhone /><span>WhatsApp</span>
+                <a
+                  className="chatbot-whatsapp-header-btn"
+                  href={WHATSAPP_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <FiPhone />
+                  <span>WhatsApp</span>
                 </a>
-                <button type="button" className="chatbot-new-chat" onClick={resetChat}><FiRefreshCw /><span>New chat</span></button>
-                <button type="button" className="chatbot-close" onClick={closeChat} aria-label="Close portfolio assistant"><FiX /></button>
+                <button
+                  type="button"
+                  className="chatbot-new-chat"
+                  onClick={resetChat}
+                >
+                  <FiRefreshCw />
+                  <span>New chat</span>
+                </button>
+                <button
+                  type="button"
+                  className="chatbot-close"
+                  onClick={closeChat}
+                  aria-label="Close portfolio assistant"
+                >
+                  <FiX />
+                </button>
               </div>
             </header>
 
-
-
-            <div ref={messagesRef} className="chatbot-messages" aria-live="polite" onScroll={handleMessagesScroll}>
+            <div
+              ref={messagesRef}
+              className="chatbot-messages"
+              aria-live="polite"
+              onScroll={handleMessagesScroll}
+            >
               {messages.length === 1 && (
-                <motion.div className="chatbot-welcome chatbot-welcome-clean" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-                  <div className="chatbot-welcome-icon"><FiMessageCircle /></div>
-                  <p className="chatbot-welcome-eyebrow">A guided tour of the portfolio</p>
+                <motion.div
+                  className="chatbot-welcome chatbot-welcome-clean"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <div className="chatbot-welcome-icon">
+                    <FiMessageCircle />
+                  </div>
+                  <p className="chatbot-welcome-eyebrow">
+                    A guided tour of the portfolio
+                  </p>
                   <h2>What would you like to explore?</h2>
-                  <p>Ask in your own words. I can explain the work, find relevant technologies, and guide you to the right next step.</p>
+                  <p>
+                    Ask in your own words. I can explain the work, find relevant
+                    technologies, and search Aniket&apos;s live GitHub repositories.
+                  </p>
                   <div className="chatbot-welcome-actions">
-                    {initialMessage.actions.map((action) => action.type === "whatsapp" ? <a key={action.label} href={action.href} target="_blank" rel="noopener noreferrer">{action.label}<FiPhone /></a> : <button key={action.label} type="button" onClick={() => runAction(action)}>{action.label}<FiArrowUpRight /></button>)}
+                    {initialMessage.actions.map((action) =>
+                      action.type === "whatsapp" ? (
+                        <a
+                          key={action.label}
+                          href={action.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {action.label}
+                          <FiPhone />
+                        </a>
+                      ) : (
+                        <button
+                          key={action.label}
+                          type="button"
+                          onClick={() => runAction(action)}
+                        >
+                          {action.label}
+                          <FiArrowUpRight />
+                        </button>
+                      )
+                    )}
                   </div>
                 </motion.div>
               )}
 
               {conversationMessages.map((message, index) => (
-                <motion.div className={`chatbot-message-row ${message.role}`} key={`${message.role}-${index}`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+                <motion.div
+                  className={`chatbot-message-row ${message.role}`}
+                  key={`${message.role}-${index}`}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
                   {message.role === "assistant" && (
-                    <div className="chatbot-avatar"><FiZap /></div>
+                    <div className="chatbot-avatar">
+                      <FiZap />
+                    </div>
                   )}
                   <div className={`chatbot-message ${message.role}`}>
                     <span>{message.content}</span>
-                    {message.role === "assistant" && message.intent && <small className="chatbot-intent">Route: {message.intent}</small>}
-                    {message.role === "assistant" && message.sources?.length > 0 && <small className="chatbot-sources">Based on: {message.sources.slice(0, 3).map((source) => source.title).join(" · ")}</small>}
-                    {message.role === "assistant" && message.latency && <small className="chatbot-latency">Response time: {message.latency} seconds</small>}
-                    {message.role === "assistant" && message.actions?.length > 0 && <div className="chatbot-actions">{message.actions.map((action) => action.type === "whatsapp" ? <a key={action.label} href={action.href} target="_blank" rel="noopener noreferrer">{action.label}<FiPhone /></a> : <button key={action.label} type="button" onClick={() => runAction(action)}>{action.label}<FiArrowUpRight /></button>)}</div>}
+                    {message.role === "assistant" && message.intent && (
+                      <small className="chatbot-intent">
+                        Route: {message.intent}
+                      </small>
+                    )}
+                    {message.role === "assistant" && message.sources?.length > 0 && (
+                      <small className="chatbot-sources">
+                        Based on: {message.sources
+                          .slice(0, 3)
+                          .map((source) => source.title)
+                          .join(" · ")}
+                      </small>
+                    )}
+                    {message.role === "assistant" && message.latency && (
+                      <small className="chatbot-latency">
+                        Response time: {message.latency} seconds
+                      </small>
+                    )}
+                    {message.role === "assistant" && message.actions?.length > 0 && (
+                      <div className="chatbot-actions">
+                        {message.actions.map((action) =>
+                          action.type === "whatsapp" ? (
+                            <a
+                              key={action.label}
+                              href={action.href}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {action.label}
+                              <FiPhone />
+                            </a>
+                          ) : (
+                            <button
+                              key={action.label}
+                              type="button"
+                              onClick={() => runAction(action)}
+                            >
+                              {action.label}
+                              <FiArrowUpRight />
+                            </button>
+                          )
+                        )}
+                      </div>
+                    )}
                   </div>
                 </motion.div>
               ))}
 
               {loading && (
                 <div className="chatbot-message-row assistant">
-                  <div className="chatbot-avatar"><FiZap /></div>
-                  <div className="chatbot-message assistant chatbot-typing"><span /><span /><span /></div>
+                  <div className="chatbot-avatar">
+                    <FiZap />
+                  </div>
+                  <div className="chatbot-message assistant chatbot-typing">
+                    <span />
+                    <span />
+                    <span />
+                  </div>
                 </div>
               )}
             </div>
 
-            {showLatestButton && <button type="button" className="chatbot-latest" onClick={scrollToLatest}>↓ Latest message</button>}
-
-            <div className="chatbot-suggested-bar">
-              <span>Try asking</span>
-              <div>{starterQuestions.map((starter) => <button type="button" key={starter} onClick={() => askQuestion(starter)} disabled={loading}>{starter}<FiArrowUpRight /></button>)}</div>
-            </div>
+            {showLatestButton && (
+              <button
+                type="button"
+                className="chatbot-latest"
+                onClick={scrollToLatest}
+              >
+                ↓ Latest message
+              </button>
+            )}
 
             <form className="chatbot-form" onSubmit={submitQuestion}>
               <div className="chatbot-composer">
-                <textarea value={question} onChange={handleComposerChange} onKeyDown={handleComposerKeyDown} placeholder={isListening ? "Listening..." : "Message the portfolio AI..."} aria-label="Message the portfolio assistant" disabled={loading || isListening} rows={1} />
-                <button type="button" onClick={startListening} disabled={loading || isListening} aria-label="Voice Input" style={{ background: isListening ? 'var(--accent)' : 'transparent', color: isListening ? '#fff' : 'var(--muted)', width: 'auto', padding: '0 8px' }}>
+                <textarea
+                  value={question}
+                  onChange={handleComposerChange}
+                  onKeyDown={handleComposerKeyDown}
+                  placeholder={
+                    isListening ? "Listening..." : "Message the portfolio AI..."
+                  }
+                  aria-label="Message the portfolio assistant"
+                  disabled={loading || isListening}
+                  rows={1}
+                />
+                <button
+                  type="button"
+                  onClick={startListening}
+                  disabled={loading || isListening}
+                  aria-label="Voice input"
+                  className={isListening ? "is-listening" : ""}
+                >
                   <FiMic />
                 </button>
-                <button type="submit" disabled={loading || !question.trim()} aria-label="Send message"><FiSend /></button>
+                <button
+                  type="submit"
+                  disabled={loading || !question.trim()}
+                  aria-label="Send message"
+                >
+                  <FiSend />
+                </button>
               </div>
-              <small className="chatbot-composer-hint">Enter to send · Shift + Enter for a new line</small>
+              <small className="chatbot-composer-hint">
+                Enter to send · Shift + Enter for a new line
+              </small>
             </form>
-            <p className="chatbot-disclaimer">Portfolio-grounded answers · no invented details</p>
+            <p className="chatbot-disclaimer">
+              Portfolio-grounded answers · no invented details
+            </p>
           </motion.section>
         ) : null}
       </AnimatePresence>

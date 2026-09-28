@@ -5,7 +5,7 @@ import { useState } from "react";
 import { FiCheck, FiGithub, FiMail, FiPhone, FiSend } from "react-icons/fi";
 import { profile } from "@/data/portfolio";
 
-const WHATSAPP_NUMBER = "916360482752";
+const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "";
 const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi Aniket, I found your portfolio and would like to connect.")}`;
 
 const initialForm = { name: "", email: "", message: "" };

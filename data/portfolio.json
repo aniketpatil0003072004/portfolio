@@ -60,15 +60,15 @@
     "role": "Software Development Intern",
     "company": "LogicBrackets Private Limited",
     "duration": "January 2026–July 2026",
-    "description": "Worked on backend development and contributed to scalable web applications and APIs. Delivered projects involving AI, OCR",
+    "description": "Engineered scalable backend architectures and robust APIs to support high-performance web applications. Spearheaded the development of AI-driven solutions, specializing in optical character recognition (OCR) and autonomous code generation systems.",
     "projects": [
       {
         "title": "OCR Document Analysis System",
-        "desc": "A tool that processes document images using OCR, organizes extracted data, and exports it to Excel for analysis and reporting."
+        "desc": "Architected an automated data extraction pipeline utilizing advanced OCR to process complex document images. The system intelligently structures raw text and generates comprehensive Excel reports, significantly accelerating data analysis workflows."
       },
       {
         "title": "Local Coding Agent",
-        "desc": "A locally running coding agent that uses local GPU resources to generate, review, and execute code autonomously."
+        "desc": "Developed a fully autonomous, LLM-powered coding agent capable of generating, reviewing, and executing complex code. Optimized the system to run entirely on local GPU hardware, ensuring maximum privacy and offline capabilities."
       }
     ],
     "skills": ["Python", "Git", "GitHub", "Postman", "OCR", "FastAPI", "Docker", "LLM", "Swagger Editor"]
