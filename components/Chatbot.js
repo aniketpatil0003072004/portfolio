@@ -281,8 +281,8 @@ export default function Chatbot() {
                 <i />
                 <i />
               </span>
-              <strong>Thinking about Aniket?</strong>
-              <small>Click here — I can tell you about his work.</small>
+              <strong>Want to know about Aniket?</strong>
+              <small>Click here to ask Aniket’s portfolio AI about his work..</small>
             </span>
 
             <span className="chatbot-teaser-arrow" aria-hidden="true">
