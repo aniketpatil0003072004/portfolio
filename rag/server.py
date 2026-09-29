@@ -10,6 +10,10 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
+
+ROOT = Path(__file__).resolve().parents[1]
+# Set cache path inside the project before importing fastembed
+os.environ["FASTEMBED_CACHE_PATH"] = str(ROOT / "rag" / "model_cache")
 from fastembed import TextEmbedding
 
 from langchain_core.tools import tool
@@ -21,7 +25,6 @@ from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 from langchain_mcp_adapters.tools import load_mcp_tools
 
-ROOT = Path(__file__).resolve().parents[1]
 load_dotenv(ROOT / ".env")
 
 CHROMA_PATH = ROOT / os.environ["CHROMA_PERSIST_DIRECTORY"]

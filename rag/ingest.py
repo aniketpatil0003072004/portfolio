@@ -7,10 +7,13 @@ from pathlib import Path
 
 import chromadb
 from dotenv import load_dotenv
-from fastembed import TextEmbedding
 
 ROOT = Path(__file__).resolve().parents[1]
 load_dotenv(ROOT / ".env")
+
+# Set cache path inside the project before importing fastembed
+os.environ["FASTEMBED_CACHE_PATH"] = str(ROOT / "rag" / "model_cache")
+from fastembed import TextEmbedding
 
 DATA_PATH = ROOT / "data" / "portfolio.json"
 CHROMA_PATH = ROOT / os.environ["CHROMA_PERSIST_DIRECTORY"]
