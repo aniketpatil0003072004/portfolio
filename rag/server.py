@@ -44,7 +44,7 @@ _collection = None
 
 class HistoryMessage(BaseModel):
     role: Literal["user", "assistant"]
-    content: str = Field(max_length=1200)
+    content: str = Field(max_length=4000)
 
 
 class Question(BaseModel):

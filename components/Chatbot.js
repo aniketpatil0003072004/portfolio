@@ -152,8 +152,14 @@ export default function Chatbot() {
             "The AI model is temporarily rate-limited. Please try again shortly."
           );
         }
+        
+        let errorDetail = data.detail;
+        if (Array.isArray(errorDetail)) {
+          errorDetail = errorDetail.map(err => err.msg || JSON.stringify(err)).join(", ");
+        }
+        
         throw new Error(
-          data.detail ||
+          errorDetail ||
             `The chatbot backend returned an error (${response.status}).`
         );
       }
